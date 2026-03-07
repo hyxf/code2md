@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+internal import UniformTypeIdentifiers
 
 struct SidebarView: View {
     @Environment(MergeMasterEngine.self) private var engine
@@ -76,6 +77,25 @@ struct SidebarView: View {
             GroupBarView()
         }
         .background(.ultraThinMaterial)
+        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+            Task {
+                var urls: [URL] = []
+                for provider in providers {
+                    if
+                        let url = try? await provider.loadItem(
+                            forTypeIdentifier: "public.file-url",
+                            options: nil) as? Data,
+                        let path = URL(dataRepresentation: url, relativeTo: nil)
+                    {
+                        urls.append(path)
+                    }
+                }
+                if !urls.isEmpty {
+                    await engine.addFiles(urls: urls)
+                }
+            }
+            return true
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 NSApp.keyWindow?.makeFirstResponder(NSApp.keyWindow?.contentView)
