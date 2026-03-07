@@ -1,0 +1,40 @@
+{
+  "activeGroup" : "a",
+  "groups" : {
+    "Default" : [
+      "code2md/Models/FileNode.swift",
+      "code2md/Utils/FileScanner.swift",
+      "code2md/Views/AppCommands.swift",
+      "code2md/Views/ContentView.swift",
+      "code2md/Views/DetailView.swift",
+      "code2md/Views/FileTreeRow.swift",
+      "code2md/Views/GroupBarView.swift",
+      "code2md/Views/SidebarView.swift",
+      "code2md/code2mdApp.swift"
+    ],
+    "a" : [
+      "code2md/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "code2md/Assets.xcassets/Contents.json",
+      "code2md/Engine/MergeMasterEngine.swift",
+      "code2md/Models/FileNode.swift",
+      "code2md/Utils/FileScanner.swift",
+      "code2md/Views/AppCommands.swift",
+      "code2md/Views/ContentView.swift",
+      "code2md/Views/DetailView.swift",
+      "code2md/Views/FileTreeRow.swift",
+      "code2md/Views/GroupBarView.swift",
+      "code2md/Views/SidebarView.swift",
+      "code2md/code2mdApp.swift"
+    ],
+    "hello" : [
+      "code2md/Utils/FileScanner.swift"
+    ],
+    "sa" : [
+      "code2md/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "code2md/Assets.xcassets/AppIcon.appiconset/Contents.json"
+    ],
+    "z" : [
+      "code2md/Utils/FileScanner.swift"
+    ]
+  }
+}
