@@ -112,6 +112,10 @@ struct MarkdownTextView: NSViewRepresentable {
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.drawsBackground = true
 
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6 // 行间距
+        textView.defaultParagraphStyle = paragraphStyle
+
         textView.textContainer?.containerSize = NSSize(
             width: CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude)
