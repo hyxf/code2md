@@ -20,6 +20,22 @@ struct AppCommands: Commands {
                 NotificationCenter.default.post(name: .forceConvert, object: nil)
             }
             .keyboardShortcut("r", modifiers: .command)
+
+            Divider()
+
+            Button("Setup CLI…") {
+                let alias = #"alias code2md="open -a code2md""#
+                let alert = NSAlert()
+                alert.messageText = "Setup CLI"
+                alert.informativeText = "Add the following alias to your shell profile (~/.zshrc or ~/.bashrc):\n\n\(alias)"
+                alert.addButton(withTitle: "Copy")
+                alert.addButton(withTitle: "Close")
+                let response = alert.runModal()
+                if response == .alertFirstButtonReturn {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(alias, forType: .string)
+                }
+            }
         }
 
         CommandGroup(after: .toolbar) {
