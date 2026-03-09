@@ -41,6 +41,10 @@ final class MergeMasterEngine {
     var selectedExtensions: Set<String> = []
     var showSelectedOnly: Bool = false
 
+    // MARK: - System Prompt
+
+    var systemPrompt: String = AppConfig.defaultSystemPrompt
+
     // MARK: - Output
 
     var markdownOutput: String = ""
@@ -231,6 +235,7 @@ final class MergeMasterEngine {
         let selectedIDs = selectedFileIDs
         let nodes = rootNodes
         let forceGenerate = force
+        let prompt = systemPrompt
 
         let result: (String, Int, Bool) = await Task.detached(priority: .userInitiated) {
             var selectedFiles: [FileNode] = []
@@ -266,7 +271,14 @@ final class MergeMasterEngine {
             }
             let tree = treeLines.joined(separator: "\n")
 
-            var md = "# Code Repository\n\n"
+            var md = ""
+
+            // Prepend system prompt if present
+            if !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                md += prompt.trimmingCharacters(in: .whitespacesAndNewlines) + "\n\n"
+            }
+
+            md += "# Code Repository\n\n"
             md += "## File Structure\n\n```\n\(tree)\n```\n\n"
             md += "## File Contents\n\n"
 
@@ -361,7 +373,6 @@ final class MergeMasterEngine {
     }
 
     func copyJSONConfig() {
-        // Build the same structure as .aicode.json
         var savedGroups: [String: [String]] = [:]
 
         for (i, rootNode) in rootNodes.enumerated() {
@@ -386,7 +397,6 @@ final class MergeMasterEngine {
             }
         }
 
-        // Sort each group's paths
         for key in savedGroups.keys {
             savedGroups[key]?.sort()
         }
@@ -412,6 +422,7 @@ final class MergeMasterEngine {
         tokenCount = 0
         generationState = .idle
         progress = 0.0
+        // systemPrompt is intentionally preserved
     }
 
     // MARK: - .aicode.json Save / Restore
@@ -438,7 +449,6 @@ final class MergeMasterEngine {
             let rootPrefix = rootID + "/"
             let allInRoot = node.allDescendantIDs()
 
-            // Convert all groups to relative paths for this root
             var savedGroups: [String: [String]] = [:]
             for (groupName, ids) in groups {
                 let selectedInRoot = ids.intersection(allInRoot)
@@ -470,15 +480,11 @@ final class MergeMasterEngine {
         let allInRoot = rootNode.allDescendantIDs()
         let rootName = rootNode.name
 
-        // Restore all groups from config
         for (groupName, paths) in config.groups {
-            // Ensure group exists
             if groups[groupName] == nil {
                 groups[groupName] = []
             }
-            // Remove auto-selected IDs for this root in this group
             groups[groupName]?.subtract(allInRoot)
-            // Restore saved paths
             for path in paths {
                 let fullID = rootName + "/" + path
                 if allInRoot.contains(fullID) {
@@ -487,7 +493,6 @@ final class MergeMasterEngine {
             }
         }
 
-        // Restore active group
         if groups[config.activeGroup] != nil {
             activeGroup = config.activeGroup
         }

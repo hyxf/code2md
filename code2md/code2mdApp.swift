@@ -26,6 +26,11 @@ struct code2mdApp: App {
         .commands {
             AppCommands()
         }
+
+        Settings {
+            SettingsView()
+                .environment(engine)
+        }
     }
 }
 
