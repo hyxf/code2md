@@ -8,40 +8,21 @@ struct SettingsView: View {
     @AppStorage("systemPrompt") private var systemPrompt: String = AppConfig.defaultSystemPrompt
 
     var body: some View {
-        @Bindable var eng = engine
-
-        VStack(alignment: .leading, spacing: 0) {
-            // Title
-            Text("角色定义")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.primary)
-                .padding(.bottom, 8)
-
-            // Editor card
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(NSColor.textBackgroundColor))
-                .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.secondary.opacity(0.15), lineWidth: 1))
-                .overlay(
-                    PlaceholderTextEditor(text: $systemPrompt)
-                        .padding(4))
-                .frame(height: 220)
-
-            // Character count
-            HStack {
-                Spacer()
+        Form {
+            Section {
+                PlaceholderTextEditor(text: $systemPrompt)
+                    .frame(height: 200)
+            } header: {
+                Text("角色定义")
+            } footer: {
                 Text("\(systemPrompt.count) 字符")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.secondary.opacity(0.6))
+                    .foregroundStyle(Color.secondary)
                     .monospacedDigit()
             }
-            .padding(.top, 6)
         }
-        .padding(28)
+        .formStyle(.grouped)
         .frame(width: 500)
-        .background(Color(NSColor.windowBackgroundColor))
+        .fixedSize(horizontal: false, vertical: true)
         .onAppear {
             engine.systemPrompt = systemPrompt
         }
@@ -74,6 +55,10 @@ struct PlaceholderTextEditor: NSViewRepresentable {
         textView.textContainerInset = NSSize(width: 8, height: 10)
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6
+        textView.defaultParagraphStyle = paragraphStyle
 
         scrollView.drawsBackground = false
         scrollView.backgroundColor = .clear
