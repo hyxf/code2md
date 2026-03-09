@@ -87,6 +87,7 @@ struct DetailView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { copiedMarkdown = false }
         }
         .onReceive(NotificationCenter.default.publisher(for: .forceConvert)) { _ in
+            guard engine.isPendingConvert else { return }
             Task { await engine.generateMarkdown(force: true) }
         }
     }
