@@ -13,6 +13,7 @@
       "code2md/code2mdApp.swift"
     ],
     "a" : [
+      "code2md/AppConfig.swift",
       "code2md/Engine/MergeMasterEngine.swift",
       "code2md/Models/FileNode.swift",
       "code2md/Utils/FileScanner.swift",

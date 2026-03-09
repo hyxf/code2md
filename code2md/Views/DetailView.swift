@@ -52,16 +52,15 @@ struct DetailView: View {
                 }
             }
 
-            // Force convert (only when pending)
-            if engine.isPendingConvert {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        Task { await engine.generateMarkdown(force: true) }
-                    } label: {
-                        Label("Force Convert", systemImage: "bolt.fill")
-                    }
-                    .help("Force convert despite token limit")
+            // Force convert (always visible, disabled when not pending)
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Task { await engine.generateMarkdown(force: true) }
+                } label: {
+                    Label("Force Convert", systemImage: "bolt.fill")
                 }
+                .disabled(!engine.isPendingConvert)
+                .help("Force convert despite token limit")
             }
 
             // Copy Markdown
