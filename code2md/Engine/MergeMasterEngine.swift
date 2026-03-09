@@ -278,7 +278,7 @@ final class MergeMasterEngine {
                 md += prompt.trimmingCharacters(in: .whitespacesAndNewlines) + "\n\n"
             }
 
-            md += "# Code Repository\n\n"
+            // md += "# Code Repository\n\n"
             md += "## File Structure\n\n```\n\(tree)\n```\n\n"
             md += "## File Contents\n\n"
 

@@ -5,6 +5,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(MergeMasterEngine.self) private var engine
+    @AppStorage("systemPrompt") private var systemPrompt: String = AppConfig.defaultSystemPrompt
 
     var body: some View {
         @Bindable var eng = engine
@@ -24,14 +25,14 @@ struct SettingsView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(Color.secondary.opacity(0.15), lineWidth: 1))
                 .overlay(
-                    PlaceholderTextEditor(text: $eng.systemPrompt)
+                    PlaceholderTextEditor(text: $systemPrompt)
                         .padding(4))
                 .frame(height: 220)
 
             // Character count
             HStack {
                 Spacer()
-                Text("\(eng.systemPrompt.count) 字符")
+                Text("\(systemPrompt.count) 字符")
                     .font(.system(size: 11))
                     .foregroundStyle(Color.secondary.opacity(0.6))
                     .monospacedDigit()
@@ -41,6 +42,12 @@ struct SettingsView: View {
         .padding(28)
         .frame(width: 500)
         .background(Color(NSColor.windowBackgroundColor))
+        .onAppear {
+            engine.systemPrompt = systemPrompt
+        }
+        .onChange(of: systemPrompt) { _, newValue in
+            engine.systemPrompt = newValue
+        }
     }
 }
 
