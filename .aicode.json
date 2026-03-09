@@ -13,8 +13,6 @@
       "code2md/code2mdApp.swift"
     ],
     "a" : [
-      "code2md/Assets.xcassets/AppIcon.appiconset/Contents.json",
-      "code2md/Assets.xcassets/Contents.json",
       "code2md/Engine/MergeMasterEngine.swift",
       "code2md/Models/FileNode.swift",
       "code2md/Utils/FileScanner.swift",

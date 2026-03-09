@@ -71,7 +71,7 @@ struct FileTreeRow: View {
                         .padding(.trailing, 8)
                 }
             }
-            .frame(height: 26)
+            .frame(height: 32)
             .background(
                 isSelected && !node.isDirectory
                     ? Color.accentColor.opacity(0.12)
