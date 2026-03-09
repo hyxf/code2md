@@ -150,6 +150,14 @@ final class MergeMasterEngine {
         Task { await generateMarkdown() }
     }
 
+    // MARK: - Mark As Pending
+
+    /// Call when something external (e.g. systemPrompt) changes and output needs regeneration
+    func markAsPending() {
+        guard generationState == .done else { return }
+        generationState = .pending
+    }
+
     // MARK: - Add Files/Folders
 
     func addFiles(urls: [URL]) async {

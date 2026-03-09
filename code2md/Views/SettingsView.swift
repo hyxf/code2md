@@ -28,6 +28,7 @@ struct SettingsView: View {
         }
         .onChange(of: systemPrompt) { _, newValue in
             engine.systemPrompt = newValue
+            engine.markAsPending()
         }
     }
 }
