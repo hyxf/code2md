@@ -57,7 +57,7 @@ struct PlaceholderTextEditor: NSViewRepresentable {
         textView.isAutomaticDashSubstitutionEnabled = false
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 6
+        paragraphStyle.lineSpacing = AppConfig.settingsEditorLineSpacing
         textView.defaultParagraphStyle = paragraphStyle
 
         scrollView.drawsBackground = false

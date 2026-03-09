@@ -10,6 +10,11 @@ enum AppConfig {
     /// Row height for each item in the file tree sidebar
     static let treeRowHeight: CGFloat = 32
 
+    // MARK: - Settings Editor
+
+    /// Line spacing for the system prompt text editor in Settings
+    static let settingsEditorLineSpacing: CGFloat = 6
+
     // MARK: - System Prompt
 
     /// Default system prompt prepended to markdown output
