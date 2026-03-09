@@ -26,6 +26,7 @@ struct DetailView: View {
             } else {
                 MarkdownTextView(text: engine.markdownOutput)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, 1)
                     .overlay(alignment: .bottomTrailing) {
                         if engine.isGenerating {
                             ProgressView()
