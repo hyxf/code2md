@@ -20,20 +20,20 @@ struct DetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar (shown while generating)
-            if engine.isGenerating {
-                ProgressView(value: engine.progress)
-                    .progressViewStyle(.linear)
-                    .tint(Color.blue)
-                    .frame(height: 2)
-            }
-
             // Main text area
             if engine.markdownOutput.isEmpty, !engine.isGenerating {
                 EmptyOutputView(isPending: engine.isPendingConvert)
             } else {
                 MarkdownTextView(text: engine.markdownOutput)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .overlay(alignment: .bottomTrailing) {
+                        if engine.isGenerating {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.8)
+                                .padding(16)
+                        }
+                    }
             }
         }
         .background(Color(NSColor.textBackgroundColor))
