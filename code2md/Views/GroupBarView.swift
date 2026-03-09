@@ -1,6 +1,20 @@
 import AppKit
 import SwiftUI
 
+// MARK: - Color Hex Extension
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r = Double((int >> 16) & 0xFF) / 255
+        let g = Double((int >> 8) & 0xFF) / 255
+        let b = Double(int & 0xFF) / 255
+        self.init(red: r, green: g, blue: b)
+    }
+}
+
 // MARK: - GroupBarView
 
 struct GroupBarView: View {
@@ -109,6 +123,9 @@ struct GroupTabView: View {
 
     private let defaultGroup = "Default"
 
+    private let activeBackground = Color(hex: "FFE390").opacity(0.25)
+    private let activeBorder = Color(hex: "FFE390")
+
     var body: some View {
         Text(name)
             .font(.system(size: 13, weight: isActive ? .semibold : .regular))
@@ -117,10 +134,10 @@ struct GroupTabView: View {
             .padding(.vertical, 5)
             .background(
                 Capsule()
-                    .fill(isActive ? Color.accentColor.opacity(0.15) : Color.clear))
+                    .fill(isActive ? activeBackground : Color.clear))
             .overlay(
                 Capsule()
-                    .stroke(isActive ? Color.accentColor.opacity(0.4) : Color.clear, lineWidth: 1))
+                    .stroke(isActive ? activeBorder : Color.clear, lineWidth: 1.5))
             .contentShape(Rectangle())
             .onTapGesture { onTap() }
             .contextMenu {
