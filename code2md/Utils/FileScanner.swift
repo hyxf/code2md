@@ -36,26 +36,42 @@ struct GitIgnoreRule {
         var p = raw
         isNegation = p.hasPrefix("!")
         if isNegation { p.removeFirst() }
+
         isDirectory = p.hasSuffix("/")
         if isDirectory { p.removeLast() }
+
+        var isAnchored = false
+        if p.hasPrefix("/") {
+            isAnchored = true
+            p.removeFirst()
+        } else if p.contains("/") {
+            isAnchored = true
+        }
+
         pattern = p
-        regex = GitIgnoreRule.makeRegex(from: p)
+        regex = GitIgnoreRule.makeRegex(from: p, isAnchored: isAnchored)
     }
 
-    nonisolated static func makeRegex(from pattern: String) -> NSRegularExpression? {
-        // Escape the pattern, then un-escape our glob chars in the correct order
+    nonisolated static func makeRegex(
+        from pattern: String,
+        isAnchored: Bool) -> NSRegularExpression?
+    {
         let escaped = NSRegularExpression.escapedPattern(for: pattern)
-        // After escaping: '*' → '\*', '?' → '\?'
-        // Replace '**' (escaped as '\*\*') with '.*' first, then '*' with '[^/]*'
-        let step1 = escaped.replacingOccurrences(of: "\\*\\*", with: "<<GLOBSTAR>>")
-        let step2 = step1.replacingOccurrences(of: "\\*", with: "[^/]*")
-        let step3 = step2.replacingOccurrences(of: "<<GLOBSTAR>>", with: ".*")
-        let step4 = step3.replacingOccurrences(of: "\\?", with: "[^/]")
-        let regexStr = "^" + step4 + "(/.*)?$"
+
+        // Handle Globstar (**) correctly for optional directories
+        let step1 = escaped.replacingOccurrences(of: "\\*\\*/", with: "(?:.*/)?")
+        let step2 = step1.replacingOccurrences(of: "/\\*\\*", with: "(?:/.*)?")
+        let step3 = step2.replacingOccurrences(of: "\\*\\*", with: ".*")
+        let step4 = step3.replacingOccurrences(of: "\\*", with: "[^/]*")
+        let step5 = step4.replacingOccurrences(of: "\\?", with: "[^/]")
+
+        let prefix = isAnchored ? "^" : "(^|/)"
+        let regexStr = prefix + step5 + "(/.*)?$"
         return try? NSRegularExpression(pattern: regexStr)
     }
 
-    nonisolated func matches(_ path: String) -> Bool {
+    nonisolated func matches(_ path: String, isDir: Bool) -> Bool {
+        if isDirectory, !isDir { return false }
         guard let regex else { return false }
         let range = NSRange(path.startIndex..., in: path)
         return regex.firstMatch(in: path, range: range) != nil
@@ -76,10 +92,17 @@ actor FileScanner {
             gitIgnoreRules = []
         }
 
-        return try await scanNode(url: url, relativeTo: url.deletingLastPathComponent())
+        return try await scanNode(
+            url: url,
+            relativeTo: url.deletingLastPathComponent(),
+            gitIgnoreRoot: url)
     }
 
-    private func scanNode(url: URL, relativeTo rootParent: URL) async throws -> FileNode? {
+    private func scanNode(
+        url: URL,
+        relativeTo rootParent: URL,
+        gitIgnoreRoot: URL) async throws -> FileNode?
+    {
         let fm = FileManager.default
         let name = url.lastPathComponent
         let relativePath = String(url.path.dropFirst(rootParent.path.count + 1))
@@ -99,9 +122,18 @@ actor FileScanner {
 
             var children: [FileNode] = []
             for child in contents.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-                let childRelative = String(child.path.dropFirst(rootParent.path.count + 1))
-                if isGitIgnored(childRelative) { continue }
-                if let node = try await scanNode(url: child, relativeTo: rootParent) {
+                let gitIgnoreRelative = String(child.path.dropFirst(gitIgnoreRoot.path.count + 1))
+                let isChildDir = (try? child
+                    .resourceValues(forKeys: Set([URLResourceKey.isDirectoryKey])))?
+                                    .isDirectory ?? false
+
+                if isGitIgnored(gitIgnoreRelative, isDir: isChildDir) { continue }
+                if
+                    let node = try await scanNode(
+                        url: child,
+                        relativeTo: rootParent,
+                        gitIgnoreRoot: gitIgnoreRoot)
+                {
                     children.append(node)
                 }
             }
@@ -134,10 +166,10 @@ actor FileScanner {
     }
 
     // Fix: last-match-wins, consistent with git behaviour
-    private func isGitIgnored(_ relativePath: String) -> Bool {
+    private func isGitIgnored(_ relativePath: String, isDir: Bool) -> Bool {
         var ignored = false
         for rule in gitIgnoreRules {
-            if rule.matches(relativePath) {
+            if rule.matches(relativePath, isDir: isDir) {
                 ignored = !rule.isNegation
             }
         }
