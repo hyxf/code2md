@@ -9,7 +9,7 @@ final class FileNode: Identifiable, Hashable {
     let relativePath: String
     let isDirectory: Bool
     let fileExtension: String
-    var children: [FileNode]?
+    let children: [FileNode]?
 
     weak var parent: FileNode?
 

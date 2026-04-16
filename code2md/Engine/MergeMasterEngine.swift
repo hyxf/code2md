@@ -494,6 +494,8 @@ final class MergeMasterEngine {
     // MARK: - Clear All
 
     func clearAll() {
+        saveDebounceTask?.cancel()
+        generateTask?.cancel()
         rootNodes.removeAll()
         rootURLs.removeAll()
         groups = [DEFAULT_GROUP: []]
