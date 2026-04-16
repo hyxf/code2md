@@ -7,6 +7,20 @@ private let DEBOUNCE_DELAY: TimeInterval = 0.5
 private let AICODE_FILENAME = ".aicode.json"
 private let DEFAULT_GROUP = "Default"
 
+// MARK: - Notification Token Wrapper
+
+/// 用于自动管理 Notification 监听的生命周期，避开 @MainActor 类的 deinit 隔离限制
+private final class NotificationToken: @unchecked Sendable {
+    let token: NSObjectProtocol
+    init(token: NSObjectProtocol) {
+        self.token = token
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(token)
+    }
+}
+
 @Observable
 @MainActor
 final class MergeMasterEngine {
@@ -60,22 +74,30 @@ final class MergeMasterEngine {
     private var generateTask: Task<Void, Never>?
     private let scanner = FileScanner()
 
+    /// 自动管理生命周期的通知凭证
+    private var promptObserverToken: NotificationToken?
+
     // MARK: - Initialization
 
     init() {
-        NotificationCenter.default.addObserver(
+        let rawToken = NotificationCenter.default.addObserver(
             forName: .systemPromptDidChange,
             object: nil,
             queue: .main)
         { [weak self] _ in
-            guard let self else { return }
-            let newPrompt = UserDefaults.standard.string(forKey: "systemPrompt") ?? AppConfig
-                .defaultSystemPrompt
-            if systemPrompt != newPrompt {
-                systemPrompt = newPrompt
-                markAsPending()
+            // 将闭包内的操作重新调度到 MainActor，解决 Sendable 闭包的并发警告
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let newPrompt = UserDefaults.standard
+                    .string(forKey: "systemPrompt") ?? AppConfig
+                    .defaultSystemPrompt
+                if systemPrompt != newPrompt {
+                    systemPrompt = newPrompt
+                    markAsPending()
+                }
             }
         }
+        promptObserverToken = NotificationToken(token: rawToken)
     }
 
     // MARK: - Computed

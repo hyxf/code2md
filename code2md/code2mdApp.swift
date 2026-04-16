@@ -3,9 +3,19 @@ import SwiftUI
 
 // MARK: - AppWindowManager
 
+@MainActor
 class AppWindowManager {
     static let shared = AppWindowManager()
-    var pendingURLs: [[URL]] = []
+    private var pendingURLs: [[URL]] = []
+
+    func enqueue(urls: [URL]) {
+        pendingURLs.append(urls)
+    }
+
+    func dequeue() -> [URL]? {
+        guard !pendingURLs.isEmpty else { return nil }
+        return pendingURLs.removeFirst()
+    }
 }
 
 // MARK: - WorkspaceView
@@ -18,8 +28,7 @@ struct WorkspaceView: View {
             .environment(engine)
             .frame(minWidth: 900, minHeight: 600)
             .onAppear {
-                if !AppWindowManager.shared.pendingURLs.isEmpty {
-                    let urls = AppWindowManager.shared.pendingURLs.removeFirst()
+                if let urls = AppWindowManager.shared.dequeue() {
                     Task { await engine.addFiles(urls: urls) }
                 }
             }
@@ -56,15 +65,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        AppWindowManager.shared.pendingURLs.append(urls)
+        AppWindowManager.shared.enqueue(urls: urls)
 
-        // 延迟执行以确保状态安全
+        // 确保第一时间认领前台焦点
+        NSApp.activate(ignoringOtherApps: true)
+
         DispatchQueue.main.async {
             // 过滤出可见的用户主窗口，忽略系统状态栏等隐藏窗口
             let visibleWindows = NSApp.windows
                 .filter { $0.isVisible && $0.className != "NSStatusBarWindow" }
-
-            NSApp.activate(ignoringOtherApps: true)
 
             if !visibleWindows.isEmpty {
                 // 已有打开的窗口时，发送新建窗口命令
@@ -73,7 +82,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     to: nil,
                     from: nil)
             }
-            // 如果没有可见窗口，系统会自动弹出一个全新的 WindowGroup 实例
         }
     }
 }
