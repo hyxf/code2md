@@ -3,6 +3,8 @@ import SwiftUI
 
 struct DetailView: View {
     @Environment(MergeMasterEngine.self) private var engine
+    @Environment(\.controlActiveState) private var controlActiveState
+
     @State private var copiedMarkdown: Bool = false
 
     var tokenColor: Color {
@@ -82,14 +84,18 @@ struct DetailView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .copyMarkdown)) { _ in
-            guard !engine.markdownOutput.isEmpty else { return }
-            engine.copyMarkdown()
-            copiedMarkdown = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { copiedMarkdown = false }
+            if controlActiveState == .key {
+                guard !engine.markdownOutput.isEmpty else { return }
+                engine.copyMarkdown()
+                copiedMarkdown = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { copiedMarkdown = false }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .forceConvert)) { _ in
-            guard engine.isPendingConvert else { return }
-            Task { await engine.generateMarkdown(force: true) }
+            if controlActiveState == .key {
+                guard engine.isPendingConvert else { return }
+                Task { await engine.generateMarkdown(force: true) }
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ import SwiftUI
 // MARK: - SettingsView
 
 struct SettingsView: View {
-    @Environment(MergeMasterEngine.self) private var engine
     @AppStorage("systemPrompt") private var systemPrompt: String = AppConfig.defaultSystemPrompt
 
     var body: some View {
@@ -23,14 +22,14 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 500)
         .fixedSize(horizontal: false, vertical: true)
-        .onAppear {
-            engine.systemPrompt = systemPrompt
-        }
-        .onChange(of: systemPrompt) { _, newValue in
-            engine.systemPrompt = newValue
-            engine.markAsPending()
+        .onChange(of: systemPrompt) { _, _ in
+            NotificationCenter.default.post(name: .systemPromptDidChange, object: nil)
         }
     }
+}
+
+extension Notification.Name {
+    static let systemPromptDidChange = Notification.Name("systemPromptDidChange")
 }
 
 // MARK: - PlaceholderTextEditor

@@ -60,6 +60,24 @@ final class MergeMasterEngine {
     private var generateTask: Task<Void, Never>?
     private let scanner = FileScanner()
 
+    // MARK: - Initialization
+
+    init() {
+        NotificationCenter.default.addObserver(
+            forName: .systemPromptDidChange,
+            object: nil,
+            queue: .main)
+        { [weak self] _ in
+            guard let self else { return }
+            let newPrompt = UserDefaults.standard.string(forKey: "systemPrompt") ?? AppConfig
+                .defaultSystemPrompt
+            if systemPrompt != newPrompt {
+                systemPrompt = newPrompt
+                markAsPending()
+            }
+        }
+    }
+
     // MARK: - Computed
 
     var isPendingConvert: Bool {

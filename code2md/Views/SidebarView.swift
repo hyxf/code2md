@@ -4,6 +4,8 @@ internal import UniformTypeIdentifiers
 
 struct SidebarView: View {
     @Environment(MergeMasterEngine.self) private var engine
+    @Environment(\.controlActiveState) private var controlActiveState
+
     @State private var showClearConfirm: Bool = false
     @State private var showExtensionFilter: Bool = false
     @State private var copiedJSON: Bool = false
@@ -154,13 +156,19 @@ struct SidebarView: View {
             Text("This will remove all files and folders from the list.")
         }
         .onReceive(NotificationCenter.default.publisher(for: .openFilePicker)) { _ in
-            openFilePicker()
+            if controlActiveState == .key {
+                openFilePicker()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .clearAll)) { _ in
-            showClearConfirm = true
+            if controlActiveState == .key {
+                showClearConfirm = true
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleSelectedOnly)) { _ in
-            engine.showSelectedOnly.toggle()
+            if controlActiveState == .key {
+                engine.showSelectedOnly.toggle()
+            }
         }
     }
 
