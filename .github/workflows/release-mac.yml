@@ -40,7 +40,7 @@ jobs:
             -scheme code2md \
             -configuration Release \
             -derivedDataPath build-x64 \
-            -destination "platform=macOS,arch=x86_64,version=14.0" \
+            -destination "platform=macOS,arch=x86_64" \
             clean build
 
       # Apple Silicon (arm64) 架构构建
@@ -50,7 +50,7 @@ jobs:
             -scheme code2md \
             -configuration Release \
             -derivedDataPath build-arm64 \
-            -destination "platform=macOS,arch=arm64,version=14.0" \
+            -destination "platform=macOS,arch=arm64" \
             clean build
 
       - name: Create Universal App
