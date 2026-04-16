@@ -21,7 +21,6 @@ struct WorkspaceView: View {
 
 @main
 struct code2mdApp: App {
-
     var body: some Scene {
         WindowGroup {
             WorkspaceView()
