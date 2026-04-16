@@ -32,17 +32,16 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.developer-tools
         NSSupportsAutomaticGraphicsSwitching: true
+        # File types
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Folder
+            CFBundleTypeRole: Viewer
+            LSItemContentTypes:
+              - public.folder
+            LSHandlerRank: Alternate
 
-    # File types
-    CFBundleDocumentTypes:
-      - CFBundleTypeName: Folder
-        CFBundleTypeRole: Viewer
-        LSItemContentTypes:
-          - public.folder
-        LSHandlerRank: Alternate
-
-      - CFBundleTypeName: Any File
-        CFBundleTypeRole: Viewer
-        LSItemContentTypes:
-          - public.item
-        LSHandlerRank: Alternate
+          - CFBundleTypeName: Any File
+            CFBundleTypeRole: Viewer
+            LSItemContentTypes:
+              - public.item
+            LSHandlerRank: Alternate
