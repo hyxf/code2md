@@ -2,7 +2,7 @@
 .build/
 Packages/
 Package.resolved
-# *.xcodeproj
+*.xcodeproj
 xcuserdata/
 
 # macOS
