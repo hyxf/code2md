@@ -32,6 +32,11 @@ struct WorkspaceView: View {
                     Task { await engine.addFiles(urls: urls) }
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .openExternalURLs)) { _ in
+                if let urls = AppWindowManager.shared.dequeue() {
+                    Task { await engine.addFiles(urls: urls) }
+                }
+            }
     }
 }
 
@@ -76,12 +81,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 .filter { $0.isVisible && $0.className != "NSStatusBarWindow" }
 
             if !visibleWindows.isEmpty {
-                // 已有打开的窗口时，发送新建窗口命令
-                NSApp.sendAction(
-                    #selector(NSDocumentController.newDocument(_:)),
-                    to: nil,
-                    from: nil)
+                // 已有打开的窗口时，通知现有窗口加载文件
+                NotificationCenter.default.post(name: .openExternalURLs, object: nil)
             }
         }
     }
+}
+
+extension Notification.Name {
+    static let openExternalURLs = Notification.Name("openExternalURLs")
 }
