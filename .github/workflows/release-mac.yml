@@ -17,6 +17,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install xcodegen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode project using xcodegen
+        run: |
+          xcodegen generate
+
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -25,24 +33,24 @@ jobs:
       - name: Verify Xcode
         run: xcodebuild -version
 
-      # Intel build
+      # Intel (x86_64) 架构构建
       - name: Build x86_64
         run: |
           xcodebuild \
             -scheme code2md \
             -configuration Release \
             -derivedDataPath build-x64 \
-            -destination "platform=macOS,arch=x86_64" \
+            -destination "platform=macOS,arch=x86_64,version=14.0" \
             clean build
 
-      # Apple Silicon build
+      # Apple Silicon (arm64) 架构构建
       - name: Build arm64
         run: |
           xcodebuild \
             -scheme code2md \
             -configuration Release \
             -derivedDataPath build-arm64 \
-            -destination "platform=macOS,arch=arm64" \
+            -destination "platform=macOS,arch=arm64,version=14.0" \
             clean build
 
       - name: Create Universal App
@@ -59,16 +67,16 @@ jobs:
           rm -rf "$UNIVERSAL_DIR"
           mkdir -p "$UNIVERSAL_DIR"
 
-          # Copy app structure
+          # 复制 ARM 架构的应用结构
           cp -R "$ARM_APP" "$UNIVERSAL_APP"
 
-          # Merge executable
+          # 合并可执行文件
           lipo -create \
             "$X64_APP/Contents/MacOS/$EXEC_NAME" \
             "$ARM_APP/Contents/MacOS/$EXEC_NAME" \
             -output "$UNIVERSAL_APP/Contents/MacOS/$EXEC_NAME"
 
-          # Verify architectures
+          # 验证架构
           lipo -archs "$UNIVERSAL_APP/Contents/MacOS/$EXEC_NAME"
 
       - name: Install create-dmg
