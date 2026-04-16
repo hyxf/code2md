@@ -1,4 +1,4 @@
-name: DevSourceSwitcher
+name: code2md
 
 options:
   bundleIdPrefix: xyz.billchiu
@@ -6,30 +6,30 @@ options:
     macOS: "14.0"
 
 targets:
-  DevSourceSwitcher:
+  code2md:
     type: application
     platform: macOS
 
     sources:
-      - path: DevSourceSwitcher
+      - path: code2md
         type: group
 
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: xyz.billchiu.DevSourceSwitcher
-        MARKETING_VERSION: "1.0.8"
-        CURRENT_PROJECT_VERSION: "8"
+        PRODUCT_BUNDLE_IDENTIFIER: xyz.billchiu.code2md
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "10"
         SWIFT_VERSION: "5.9"
         ENABLE_APP_SANDBOX: NO
         ARCHS: "$(ARCHS_STANDARD)"
 
     info:
-      path: DevSourceSwitcher/Info.plist
+      path: code2md/Info.plist
       properties:
-        CFBundleName: Dev Source Switcher
-        CFBundleDisplayName: Dev Source Switcher
+        CFBundleName: code2md
+        CFBundleDisplayName: code2md
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.developer-tools
-        LSUIElement: true
+        # LSUIElement: true
         NSSupportsAutomaticGraphicsSwitching: true
