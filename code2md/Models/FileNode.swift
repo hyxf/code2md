@@ -39,11 +39,11 @@ final class FileNode: Identifiable, Hashable {
     }
 
     static func == (lhs: FileNode, rhs: FileNode) -> Bool {
-        lhs.id == rhs.id
+        lhs === rhs
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(ObjectIdentifier(self))
     }
 
     /// Flatten all descendant file (non-directory) nodes

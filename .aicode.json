@@ -14,6 +14,8 @@
     ],
     "a" : [
       "code2md/AppConfig.swift",
+      "code2md/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "code2md/Assets.xcassets/AppIcon.appiconset/Contents.json",
       "code2md/Assets.xcassets/Contents.json",
       "code2md/Engine/MergeMasterEngine.swift",
       "code2md/Info.plist",

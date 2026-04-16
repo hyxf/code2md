@@ -129,6 +129,16 @@ struct SidebarView: View {
                 .help("Copy JSON config")
 
                 Button {
+                    Task {
+                        await engine.reloadFiles()
+                    }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .foregroundStyle(Color.secondary)
+                }
+                .help("Reload local files")
+
+                Button {
                     showClearConfirm = true
                 } label: {
                     Image(systemName: "trash")

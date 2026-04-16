@@ -193,6 +193,39 @@ final class MergeMasterEngine {
         await generateMarkdown()
     }
 
+    // MARK: - Reload Files
+
+    func reloadFiles() async {
+        await saveAllConfigs()
+
+        generationState = .generating
+        progress = 0.0
+
+        var newNodes: [FileNode] = []
+        var newAvailableExts: Set<String> = []
+
+        for (i, url) in rootURLs.enumerated() {
+            do {
+                guard let node = try await scanner.scan(url: url) else { continue }
+                newNodes.append(node)
+
+                await restoreSelection(rootURL: url, rootNode: node)
+
+                let exts = node.allFileDescendants().map(\.fileExtension).filter { !$0.isEmpty }
+                newAvailableExts.formUnion(exts)
+
+                progress = Double(i + 1) / Double(rootURLs.count)
+            } catch {
+                print("Scan error: \(error)")
+            }
+        }
+
+        rootNodes = newNodes
+        availableExtensions = Array(newAvailableExts).sorted()
+
+        await generateMarkdown()
+    }
+
     // MARK: - Toggle Selection
 
     func toggleSelection(node: FileNode, isSelected: Bool) {
