@@ -18,12 +18,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install xcodegen
-        run: |
-          brew install xcodegen
+        run: brew install xcodegen
 
-      - name: Generate Xcode project using xcodegen
-        run: |
-          xcodegen generate
+      - name: Generate Xcode project
+        run: xcodegen generate
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -33,7 +31,7 @@ jobs:
       - name: Verify Xcode
         run: xcodebuild -version
 
-      # Intel (x86_64) 架构构建
+      # Intel 架构
       - name: Build x86_64
         run: |
           xcodebuild \
@@ -43,7 +41,7 @@ jobs:
             -destination "platform=macOS,arch=x86_64" \
             clean build
 
-      # Apple Silicon (arm64) 架构构建
+      # Apple Silicon 架构
       - name: Build arm64
         run: |
           xcodebuild \
@@ -53,6 +51,7 @@ jobs:
             -destination "platform=macOS,arch=arm64" \
             clean build
 
+      # 合并 Universal
       - name: Create Universal App
         run: |
           APP_NAME="code2md.app"
@@ -67,24 +66,53 @@ jobs:
           rm -rf "$UNIVERSAL_DIR"
           mkdir -p "$UNIVERSAL_DIR"
 
-          # 复制 ARM 架构的应用结构
+          # 用 arm64 结构
           cp -R "$ARM_APP" "$UNIVERSAL_APP"
 
-          # 合并可执行文件
+          # 合并二进制
           lipo -create \
             "$X64_APP/Contents/MacOS/$EXEC_NAME" \
             "$ARM_APP/Contents/MacOS/$EXEC_NAME" \
             -output "$UNIVERSAL_APP/Contents/MacOS/$EXEC_NAME"
 
-          # 验证架构
+          # 验证
           lipo -archs "$UNIVERSAL_APP/Contents/MacOS/$EXEC_NAME"
+
+      # ⭐ 设置 Volume Icon（桌面挂载图标）
+      - name: Setup Volume Icon
+        run: |
+          APP_PATH="dist/code2md.app"
+          ICON_DIR="$APP_PATH/Contents/Resources"
+
+          # 自动找 icns
+          ICNS_FILE=$(find "$ICON_DIR" -name "*.icns" | head -n 1)
+
+          if [ -z "$ICNS_FILE" ]; then
+            echo "❌ No .icns found"
+            exit 1
+          fi
+
+          echo "✅ Using icon: $ICNS_FILE"
+
+          # 生成 VolumeIcon
+          cp "$ICNS_FILE" dist/.VolumeIcon.icns
+
+          # 设置 Finder 标志（关键）
+          SetFile -c icnC dist/.VolumeIcon.icns
+          SetFile -a C dist
+
+          ls -la dist
 
       - name: Install create-dmg
         run: brew install create-dmg
 
+      # 🚀 创建 DMG（带专业配置）
       - name: Create Universal DMG
         run: |
           DMG_NAME="code2md-macOS-universal.dmg"
+
+          # （可选）DMG 文件本身 icon
+          cp dist/.VolumeIcon.icns dmg.icns
 
           create-dmg \
             --volname "code2md" \
@@ -93,6 +121,9 @@ jobs:
             --icon "code2md.app" 180 170 \
             --hide-extension "code2md.app" \
             --app-drop-link 520 170 \
+            --volicon dmg.icns \
+            --format UDZO \
+            --no-internet-enable \
             "$DMG_NAME" \
             "dist"
 
